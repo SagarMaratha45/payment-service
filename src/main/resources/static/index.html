@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Service - Demo</title>
+
+    <!-- ✅ Optional favicon to stop that 404 error -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div class="container">
+    <h1>Razorpay Payment Demo</h1>
+
+    <div class="form-container">
+        <input type="number" id="amount" placeholder="Enter amount (₹)" />
+        <input type="text" id="userId" placeholder="Enter User ID" value="demo-user-1" />
+        <button id="payButton">Pay Now</button>
+    </div>
+
+    <div id="response"></div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="/script.js"></script>
+</body>
+</html>
