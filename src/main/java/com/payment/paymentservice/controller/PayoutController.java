@@ -7,7 +7,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/payouts")
 @RequiredArgsConstructor
@@ -19,7 +21,19 @@ public class PayoutController {
     public ResponseEntity<PayoutResponse> createPayout(
             @Valid @RequestBody PayoutRequest request
     ) {
+        log.info("Received payout request: userId={}, referenceId={}, amount={}",
+                request.getExternalUserId(),
+                request.getExternalReferenceId(),
+                request.getAmount()
+        );
+
         PayoutResponse response = payoutService.createPayout(request);
+
+        log.info("Payout created: transactionId={}, payoutId={}",
+                response.getTransactionId(),
+                response.getRazorpayPayoutId()
+        );
+
         return ResponseEntity.ok(response);
     }
 }

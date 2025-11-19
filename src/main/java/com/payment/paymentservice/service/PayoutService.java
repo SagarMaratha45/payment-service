@@ -8,10 +8,12 @@ import com.payment.paymentservice.model.TransactionType;
 import com.payment.paymentservice.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PayoutService {
@@ -20,8 +22,12 @@ public class PayoutService {
 
     public PayoutResponse createPayout(PayoutRequest req) {
 
+        log.info("Creating payout: userId={}, referenceId={}, amount={}",
+                req.getExternalUserId(), req.getExternalReferenceId(), req.getAmount());
+
         // TODO: Replace with real Razorpay Payout API when enabled for your account
         String fakePayoutId = "pout_" + UUID.randomUUID();
+        log.debug("Generated fake payout id={}", fakePayoutId);
 
         Transaction txn = Transaction.builder()
                 .type(TransactionType.PAYOUT_OUT)
@@ -36,6 +42,9 @@ public class PayoutService {
                 .build();
 
         transactionRepository.save(txn);
+
+        log.info("Payout created successfully: payoutId={}, referenceId={}",
+                fakePayoutId, req.getExternalReferenceId());
 
         return new PayoutResponse(
                 txn.getId(),

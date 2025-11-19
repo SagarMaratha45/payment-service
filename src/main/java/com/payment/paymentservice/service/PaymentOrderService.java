@@ -16,10 +16,12 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentOrderService {
@@ -40,7 +42,27 @@ public class PaymentOrderService {
         options.put("receipt", req.getExternalReferenceId());
         options.put("payment_capture", 1);
 
+        log.info("Creating Razorpay order: userId={}, referenceId={}, amount={}, currency={}",
+                req.getExternalUserId(),
+                req.getExternalReferenceId(),
+                req.getAmount(),
+                req.getCurrency()
+        );
+
         Order order = razorpayClient.orders.create(options);
+
+        log.info("Razorpay order created: razorpayOrderId={}, amountPaise={}",
+                order.get("id"), order.get("amount")
+        );
+
+        log.debug("Saving Transaction record. referenceId={}", req.getExternalReferenceId());
+
+        log.info("Payment order created successfully. razorpayOrderId={}, userId={}, referenceId={}",
+                order.get("id"),
+                req.getExternalUserId(),
+                req.getExternalReferenceId()
+        );
+
 
         // 2) Save PaymentOrder
         PaymentOrder po = PaymentOrder.builder()
