@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/payouts")
+@RequestMapping("/api/v1/payouts")
 @RequiredArgsConstructor
 public class PayoutController {
 
