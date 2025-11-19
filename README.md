@@ -51,19 +51,18 @@ spring.data.mongodb.uri=mongodb://localhost:27017/payment_service
 razorpay.key-id=your_test_key_id_here
 razorpay.key-secret=your_test_key_secret_here
 
-# Optional – when you configure actual webhook in Razorpay dashboard
-razorpay.webhook-secret=your_webhook_secret_here
-
+---
 
 ## Running Locally
 # from project root
 `mvn clean install`
 `mvn spring-boot:run`
 
-
 # By default, the app will start on:
 
 `http://localhost:3006`
+
+---
 
 ## Integration Guide (for Other Services)
 Concepts
@@ -82,7 +81,12 @@ Any business ID in your system, for example:
 
 We use these to correlate payment/payout records with your existing data.
 
+---
+
 ## API Reference
+
+---
+
 ## 1. Create Payment Order (Incoming Payment)
 
 Other microservices call this to initiate a Razorpay payment.
@@ -128,7 +132,9 @@ Content-Type: `application/json`
 
 Frontend integrates with Razorpay Checkout (see snippet below).
 
-## 3. Get Transaction by ID
+---
+
+## 2. Get Transaction by ID
 
 URL: `GET` `/api/transactions/{id}`
 
@@ -152,16 +158,18 @@ Response
   "createdAt": "2025-11-19T18:45:12.345Z"
 }`
 
+---
+
 ## 3. Search Transactions
 
-# 4.1 By externalReferenceId
+# 3.1 By externalReferenceId
 
 Get all transactions for a specific business object (e.g. investment).
 
 URL:
 `GET` `/api/transactions?externalReferenceId=INVESTMENT`
 
-# 4.2 By externalUserId
+# 3.2 By externalUserId
 
 Get all transactions for a specific user.
 
@@ -190,7 +198,9 @@ Response
 
 If no filters are provided (GET /api/v1/transactions), the service returns an empty list.
 
-## 5. Create Payout (Outgoing Payment) – Stubbed
+---
+
+## 4. Create Payout (Outgoing Payment) – Stubbed
 
 This endpoint is meant for admin payouts (e.g. sending money to investor/funder).
 Currently, it only:
