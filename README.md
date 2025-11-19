@@ -38,7 +38,7 @@ They just call this service with:
 
 Configuration is done via Spring properties (`application.properties` or environment variables).
 
-### Mandatory properties
+## Mandatory properties
 
 properties
 # Application
@@ -61,9 +61,9 @@ razorpay.webhook-secret=your_webhook_secret_here
 `mvn spring-boot:run`
 
 
-## By default, the app will start on:
+# By default, the app will start on:
 
-`http://localhost:8080`
+`http://localhost:3006`
 
 ## Integration Guide (for Other Services)
 Concepts
@@ -74,38 +74,37 @@ The ID of the user in your system (from User Service).
 externalReferenceId
 Any business ID in your system, for example:
 
-`INVESTMENT_ID`
+`INVESTMENT`
 
-`FUNDING_ID`
+`FUNDING`
 
-`WITHDRAW_ID`
+`WITHDRAW`
 
 We use these to correlate payment/payout records with your existing data.
 
 ## API Reference
-1. Create Payment Order (Incoming Payment)
+## 1. Create Payment Order (Incoming Payment)
 
 Other microservices call this to initiate a Razorpay payment.
 
-URL: `POST` `/api/payments/orders`
+URL: `POST` `/api/v1/payments/orders`
 
 Content-Type: `application/json`
 
-Request Body
+#Request Body
+`
 {
   "externalUserId": "USER-123",
-  "externalReferenceId": "INVESTMENT-987",
+  "externalReferenceId": "INVESTMENT",
   "amount": 5000,
   "currency": "INR"
 }
+`
 
+'externalReferenceId' should be something you can use later to look up this payment.
 
-amount is in major units (e.g. ₹5000, not paise).
-The service converts to paise for Razorpay.
-
-externalReferenceId should be something you can use later to look up this payment in your own system.
-
-Response
+#Response
+`
 {
   "paymentOrderId": "6771e33f0e8d13532a9b8b52",
   "razorpayOrderId": "order_PcY8zVg7E0u123",
@@ -113,94 +112,37 @@ Response
   "currency": "INR",
   "razorpayKeyId": "rzp_test_abc123xyz"
 }
+`
 
+'razorpayOrderId' → used by frontend to open Razorpay Checkout
 
-razorpayOrderId → used by frontend to open Razorpay Checkout
+'razorpayKeyId' → public key for Checkout
 
-razorpayKeyId → public key for Checkout
+'paymentOrderId' → local MongoDB ID; mostly internal to this service
 
-paymentOrderId → local MongoDB ID; mostly internal to this service
+##What you need to do:
 
-What you need to do:
+#Call this API from your backend.
 
-Call this API from your backend.
-
-Pass razorpayOrderId + razorpayKeyId to your frontend.
+#Pass razorpayOrderId + razorpayKeyId to your frontend.
 
 Frontend integrates with Razorpay Checkout (see snippet below).
 
-2. Razorpay Webhook Endpoint
+## 3. Get Transaction by ID
 
-Razorpay will call this when a payment succeeds or fails.
-
-URL: POST /api/payments/webhook
-
-Content-Type: application/json
-
-Headers:
-
-X-Razorpay-Signature: <signature> (optional in dev, required in prod)
-
-We expect at least these fields:
-
-event = "payment.captured" or "payment.failed"
-
-payload.payment.entity.id = Razorpay payment id (pay_xxx)
-
-payload.payment.entity.order_id = Razorpay order id (order_xxx)
-
-Example payload for success
-{
-  "event": "payment.captured",
-  "payload": {
-    "payment": {
-      "entity": {
-        "id": "pay_PcY9ABCDEF1234",
-        "order_id": "order_PcY8zVg7E0u123"
-      }
-    }
-  }
-}
-
-Response
-
-Status: 200 OK
-
-Body: empty
-
-What the service does
-
-Looks up PaymentOrder by razorpayOrderId.
-
-Updates:
-
-PaymentOrder.status → SUCCESS
-
-PaymentOrder.razorpayPaymentId → pay_xxx
-
-Updates its associated Transaction → SUCCESS.
-
-Your responsibility:
-You can listen to status changes by:
-
-Polling /api/transactions?externalReferenceId=...
-
-Or (optionally) build your own listener that consumes DB changes / internal events (not included in this service).
-
-3. Get Transaction by ID
-
-URL: GET /api/transactions/{id}
+URL: `GET` `/api/transactions/{id}`
 
 Example
-GET /api/transactions/6771e3ab0e8d13532a9b8b55
+`GET` `/api/v1/transactions/6771e3ab0e8d13532a9b8b55`
 
-Example Response
-{
+Example 
+Response
+`{
   "id": "6771e3ab0e8d13532a9b8b55",
   "type": "PAYMENT_IN",
   "status": "SUCCESS",
   "externalUserId": "USER-123",
-  "externalReferenceId": "INVESTMENT-987",
+  "externalReferenceId": "INVESTMENT",
   "amount": 5000,
   "currency": "INR",
   "razorpayOrderId": "order_PcY8zVg7E0u123",
@@ -208,25 +150,27 @@ Example Response
   "razorpayPayoutId": null,
   "direction": "IN",
   "createdAt": "2025-11-19T18:45:12.345Z"
-}
+}`
 
-4. Search Transactions
-4.1 By externalReferenceId
+## 3. Search Transactions
+
+# 4.1 By externalReferenceId
 
 Get all transactions for a specific business object (e.g. investment).
 
 URL:
-GET /api/transactions?externalReferenceId=INVESTMENT-987
+`GET` `/api/transactions?externalReferenceId=INVESTMENT`
 
-4.2 By externalUserId
+# 4.2 By externalUserId
 
 Get all transactions for a specific user.
 
 URL:
-GET /api/transactions?externalUserId=USER-123
+`GET` `/api/transactions?externalUserId=USER-123`
 
-Example Response
-[
+Example 
+Response
+`
   {
     "id": "6771e3ab0e8d13532a9b8b55",
     "type": "PAYMENT_IN",
@@ -241,12 +185,12 @@ Example Response
     "direction": "IN",
     "createdAt": "2025-11-19T18:45:12.345Z"
   }
-]
+`
 
 
-If no filters are provided (GET /api/transactions), the service returns an empty list.
+If no filters are provided (GET /api/v1/transactions), the service returns an empty list.
 
-5. Create Payout (Outgoing Payment) – Stubbed
+## 5. Create Payout (Outgoing Payment) – Stubbed
 
 This endpoint is meant for admin payouts (e.g. sending money to investor/funder).
 Currently, it only:
@@ -255,16 +199,12 @@ Creates a Transaction of type PAYOUT_OUT
 
 Marks it SUCCESS
 
-Generates a fake razorpayPayoutId (pout_<UUID>)
+URL: `POST` `/api/payouts`
 
-Note: This does not call Razorpay Payouts API yet.
-Integrators should treat this as a hook and plug in real payout logic later if needed.
-
-URL: POST /api/payouts
-
-Content-Type: application/json
+`Content-Type`: `application/json`
 
 Request Body
+`
 {
   "externalUserId": "USER-123",
   "externalReferenceId": "WITHDRAWAL-555",
@@ -276,21 +216,22 @@ Request Body
     "upiIdOrAccount": "testuser@upi"
   }
 }
+`
 
+# mode – for future use (UPI, BANK_TRANSFER, etc.)
 
-mode – for future use (UPI, BANK_TRANSFER, etc.)
-
-beneficiary – details needed by your payout provider
+# beneficiary – details needed by your payout provider
 
 Response
+`
 {
   "transactionId": "6771e4cd0e8d13532a9b8b60",
   "razorpayPayoutId": "pout_4d363c25-4c77-4fbb-98f4-02e5b69c10a9",
   "status": "SUCCESS"
 }
-
+`
 
 You can then fetch the full transaction:
 
-GET /api/transactions/6771e4cd0e8d13532a9b8b60
+# GET /api/transactions/6771e4cd0e8d13532a9b8b60
 
