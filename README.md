@@ -40,7 +40,7 @@ Configuration is done via Spring properties (`application.properties` or environ
 
 ### Mandatory properties
 
-```properties
+properties
 # Application
 spring.application.name=paymentservice
 
@@ -57,18 +57,15 @@ razorpay.webhook-secret=your_webhook_secret_here
 
 ## Running Locally
 # from project root
-mvn clean install
-mvn spring-boot:run
+`mvn clean install`
+`mvn spring-boot:run`
 
 
-By default, the app will start on:
+## By default, the app will start on:
 
-http://localhost:8080
+`http://localhost:8080`
 
-
-(If you changed the port in application.properties, adjust accordingly.)
-
-Integration Guide (for Other Services)
+## Integration Guide (for Other Services)
 Concepts
 
 externalUserId
@@ -77,22 +74,22 @@ The ID of the user in your system (from User Service).
 externalReferenceId
 Any business ID in your system, for example:
 
-INVESTMENT_ID
+`INVESTMENT_ID`
 
-ORDER_ID
+`FUNDING_ID`
 
-TRANSACTION_ID in another service
+`WITHDRAW_ID`
 
 We use these to correlate payment/payout records with your existing data.
 
-API Reference
+## API Reference
 1. Create Payment Order (Incoming Payment)
 
 Other microservices call this to initiate a Razorpay payment.
 
-URL: POST /api/payments/orders
+URL: `POST` `/api/payments/orders`
 
-Content-Type: application/json
+Content-Type: `application/json`
 
 Request Body
 {
