@@ -1,8 +1,7 @@
 package com.payment.paymentservice.model;
 
 public enum PaymentStatus {
-    CREATED,
-    PENDING,
+    INITIATED,
     SUCCESS,
     FAILED
 }

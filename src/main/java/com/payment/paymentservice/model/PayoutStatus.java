@@ -1,8 +1,7 @@
 package com.payment.paymentservice.model;
 
-public enum TransactionStatus {
-    CREATED,
-    PROCESSING,
+public enum PayoutStatus {
+    INITIATED,
     SUCCESS,
     FAILED
 }

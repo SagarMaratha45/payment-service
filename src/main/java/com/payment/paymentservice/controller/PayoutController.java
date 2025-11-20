@@ -1,13 +1,13 @@
 package com.payment.paymentservice.controller;
 
-import com.payment.paymentservice.dto.PayoutRequest;
-import com.payment.paymentservice.dto.PayoutResponse;
+import com.payment.paymentservice.dto.CreatePayoutRequest;
+import com.payment.paymentservice.dto.CreatePayoutResponse;
 import com.payment.paymentservice.service.PayoutService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -18,22 +18,13 @@ public class PayoutController {
     private final PayoutService payoutService;
 
     @PostMapping
-    public ResponseEntity<PayoutResponse> createPayout(
-            @Valid @RequestBody PayoutRequest request
-    ) {
-        log.info("Received payout request: userId={}, referenceId={}, amount={}",
-                request.getExternalUserId(),
-                request.getExternalReferenceId(),
-                request.getAmount()
-        );
+    public ResponseEntity<CreatePayoutResponse> createPayout(@Valid @RequestBody CreatePayoutRequest request) {
+        log.info("Received payout create request: userId={}, amount={}, upiId={}",
+                request.getExternalUserId(), request.getAmount(), request.getUpiId());
 
-        PayoutResponse response = payoutService.createPayout(request);
+        CreatePayoutResponse response = payoutService.createPayout(request);
 
-        log.info("Payout created: transactionId={}, payoutId={}",
-                response.getTransactionId(),
-                response.getRazorpayPayoutId()
-        );
-
+        log.info("Payout response: id={}, status={}", response.getPayoutId(), response.getStatus());
         return ResponseEntity.ok(response);
     }
 }

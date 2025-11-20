@@ -1,55 +1,71 @@
 package com.payment.paymentservice.service;
 
-import com.payment.paymentservice.dto.PayoutRequest;
-import com.payment.paymentservice.dto.PayoutResponse;
-import com.payment.paymentservice.model.Transaction;
-import com.payment.paymentservice.model.TransactionStatus;
-import com.payment.paymentservice.model.TransactionType;
-import com.payment.paymentservice.repository.TransactionRepository;
+import com.payment.paymentservice.dto.CreatePayoutRequest;
+import com.payment.paymentservice.dto.CreatePayoutResponse;
+import com.payment.paymentservice.model.Payout;
+import com.payment.paymentservice.model.PayoutStatus;
+import com.payment.paymentservice.repository.PayoutRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import java.time.Instant;
-import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PayoutService {
 
-    private final TransactionRepository transactionRepository;
+    private final PayoutRepository payoutRepository;
+    private final UserServiceClient userServiceClient;
 
-    public PayoutResponse createPayout(PayoutRequest req) {
+        @Value("${payment.admin.user-id}")
+        private String adminUserId;
 
-        log.info("Creating payout: userId={}, referenceId={}, amount={}",
-                req.getExternalUserId(), req.getExternalReferenceId(), req.getAmount());
+    public CreatePayoutResponse createPayout(CreatePayoutRequest req) {
 
-        // TODO: Replace with real Razorpay Payout API when enabled for your account
-        String fakePayoutId = "pout_" + UUID.randomUUID();
-        log.debug("Generated fake payout id={}", fakePayoutId);
+        log.info("Starting payout. userId={}, amount={}, upiId={}",
+                req.getExternalUserId(), req.getAmount(), req.getUpiId());
 
-        Transaction txn = Transaction.builder()
-                .type(TransactionType.PAYOUT_OUT)
-                .status(TransactionStatus.SUCCESS)
+        // 1) Create payout entry with INITIATED
+        Payout payout = Payout.builder()
                 .externalUserId(req.getExternalUserId())
-                .externalReferenceId(req.getExternalReferenceId())
                 .amount(req.getAmount())
-                .currency(req.getCurrency())
-                .direction("OUT")
-                .razorpayPayoutId(fakePayoutId)
+                .upiId(req.getUpiId())
+                .status(PayoutStatus.INITIATED)
                 .createdAt(Instant.now())
+                .updatedAt(Instant.now())
                 .build();
 
-        transactionRepository.save(txn);
+        payout = payoutRepository.save(payout);
+        log.info("Payout record created with id={} and status={}", payout.getId(), payout.getStatus());
 
-        log.info("Payout created successfully: payoutId={}, referenceId={}",
-                fakePayoutId, req.getExternalReferenceId());
+        // 2) (Real world) call payment provider payout API.
+        // For demo: simulate success
+        log.info("Simulating payout success in demo mode.");
 
-        return new PayoutResponse(
-                txn.getId(),
-                fakePayoutId,
-                txn.getStatus().name()
+        // 3) Mark as SUCCESS
+        payout.setStatus(PayoutStatus.SUCCESS);
+        payout.setUpdatedAt(Instant.now());
+        payout = payoutRepository.save(payout);
+        log.info("Payout id={} marked as SUCCESS", payout.getId());
+
+        // 4) Adjust wallets:
+        //    - Deduct from admin
+        userServiceClient.adjustUserWallet(adminUserId, -req.getAmount());
+        //    - Add to user
+        userServiceClient.adjustUserWallet(req.getExternalUserId(), req.getAmount());
+
+        // 5) Return response
+        return new CreatePayoutResponse(
+                payout.getId(),
+                payout.getExternalUserId(),
+                payout.getAmount(),
+                payout.getUpiId(),
+                payout.getStatus().name(),
+                "Payout processed successfully (demo mode)."
         );
     }
 }
