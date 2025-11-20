@@ -5,24 +5,32 @@ import com.payment.paymentservice.dto.CreatePayoutResponse;
 import com.payment.paymentservice.model.Payout;
 import com.payment.paymentservice.model.PayoutStatus;
 import com.payment.paymentservice.repository.PayoutRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
-@Slf4j
+// @Slf4j
 @Service
-@RequiredArgsConstructor
+// @RequiredArgsConstructor
 public class PayoutService {
+
+    private static final Logger log = LoggerFactory.getLogger(PayoutService.class);
 
     private final PayoutRepository payoutRepository;
     private final UserServiceClient userServiceClient;
 
         @Value("${payment.admin.user-id}")
         private String adminUserId;
+
+    // Constructor to replace @RequiredArgsConstructor
+    public PayoutService(PayoutRepository payoutRepository, UserServiceClient userServiceClient) {
+        this.payoutRepository = payoutRepository;
+        this.userServiceClient = userServiceClient;
+    }
 
     public CreatePayoutResponse createPayout(CreatePayoutRequest req) {
 

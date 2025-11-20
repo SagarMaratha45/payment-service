@@ -4,18 +4,25 @@ import com.payment.paymentservice.dto.CreatePaymentRequest;
 import com.payment.paymentservice.dto.CreatePaymentResponse;
 import com.payment.paymentservice.service.PaymentService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
+// @Slf4j
 @RestController
 @RequestMapping("/api/v1/payments")
-@RequiredArgsConstructor
+// @RequiredArgsConstructor
 public class PaymentController {
 
+    private static final Logger log = LoggerFactory.getLogger(PaymentController.class);
+
     private final PaymentService paymentService;
+
+    // Constructor to replace @RequiredArgsConstructor
+    public PaymentController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
 
     @PostMapping
     public ResponseEntity<CreatePaymentResponse> createPayment(@Valid @RequestBody CreatePaymentRequest request) {
