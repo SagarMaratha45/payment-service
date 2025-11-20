@@ -56,7 +56,7 @@ public class PayoutService {
         //    - Deduct from admin
         userServiceClient.adjustUserWallet(adminUserId, -req.getAmount());
         //    - Add to user
-        userServiceClient.adjustUserWallet(req.getExternalUserId(), req.getAmount());
+        userServiceClient.adjustUserWallet(req.getExternalUserId(), -req.getAmount());
 
         // 5) Return response
         return new CreatePayoutResponse(
@@ -65,7 +65,7 @@ public class PayoutService {
                 payout.getAmount(),
                 payout.getUpiId(),
                 payout.getStatus().name(),
-                "Payout processed successfully (demo mode)."
+                "Payout processed successfully."
         );
     }
 }
