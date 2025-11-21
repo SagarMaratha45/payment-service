@@ -21,20 +21,24 @@ public class Payment {
     private Instant createdAt;
     private Instant updatedAt;
 
-    // private String razorpayOrderId;
-    // private String razorpayPaymentId;
+    private String razorpayOrderId;
+    private String razorpayPaymentId;
+    private String razorpaySignature;
 
     // Default constructor
     public Payment() {}
 
     // All args constructor
-    public Payment(String id, String externalUserId, double amount, PaymentStatus status, Instant createdAt, Instant updatedAt) {
+    public Payment(String id, String externalUserId, double amount, PaymentStatus status, Instant createdAt, Instant updatedAt, String razorpayOrderId, String razorpayPaymentId, String razorpaySignature) {
         this.id = id;
         this.externalUserId = externalUserId;
         this.amount = amount;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.razorpayOrderId = razorpayOrderId;
+        this.razorpayPaymentId = razorpayPaymentId;
+        this.razorpaySignature = razorpaySignature;
     }
 
     // Getters
@@ -60,6 +64,18 @@ public class Payment {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+    
+    public String getRazorpayOrderId() {
+        return razorpayOrderId;
+    }
+
+    public String getRazorpayPaymentId() {
+        return razorpayPaymentId;
+    }
+
+    public String getRazorpaySignature() {
+        return razorpaySignature;
     }
 
     // Setters
@@ -87,6 +103,18 @@ public class Payment {
         this.updatedAt = updatedAt;
     }
 
+    public void setRazorpayOrderId(String razorpayOrderId) {
+        this.razorpayOrderId = razorpayOrderId;
+    }
+
+    public void setRazorpayPaymentId(String razorpayPaymentId) {
+        this.razorpayPaymentId = razorpayPaymentId;
+    }
+
+    public void setRazorpaySignature(String razorpaySignature) {
+        this.razorpaySignature = razorpaySignature;
+    }   
+
     // Builder pattern
     public static PaymentBuilder builder() {
         return new PaymentBuilder();
@@ -99,6 +127,9 @@ public class Payment {
         private PaymentStatus status;
         private Instant createdAt;
         private Instant updatedAt;
+        private String razorpayOrderId;
+        private String razorpayPaymentId;
+        private String razorpaySignature;
 
         public PaymentBuilder id(String id) {
             this.id = id;
@@ -130,8 +161,23 @@ public class Payment {
             return this;
         }
 
+        public PaymentBuilder razorpayOrderId(String razorpayOrderId) {
+            this.razorpayOrderId = razorpayOrderId;
+            return this;
+        }
+
+        public PaymentBuilder razorpayPaymentId(String razorpayPaymentId) {
+            this.razorpayPaymentId = razorpayPaymentId;
+            return this;
+        }
+
+        public PaymentBuilder razorpaySignature(String razorpaySignature) {
+            this.razorpaySignature = razorpaySignature;
+            return this;
+        }
+
         public Payment build() {
-            return new Payment(id, externalUserId, amount, status, createdAt, updatedAt);
+            return new Payment(id, externalUserId, amount, status, createdAt, updatedAt, razorpayOrderId, razorpayPaymentId, razorpaySignature);
         }
     }
 }
