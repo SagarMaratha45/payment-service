@@ -1,7 +1,7 @@
 package com.payment.paymentservice.controller;
 
 import com.payment.paymentservice.dto.CreatePaymentRequest;
-import com.payment.paymentservice.dto.CreatePaymentResponse;
+import com.payment.paymentservice.dto.PaymentInitResponse;
 import com.payment.paymentservice.service.PaymentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +28,7 @@ class PaymentControllerTest {
     private PaymentController paymentController;
 
     private CreatePaymentRequest paymentRequest;
-    private CreatePaymentResponse paymentResponse;
+    private PaymentInitResponse paymentResponse;
 
     @BeforeEach
     void setUp() {
@@ -37,13 +37,16 @@ class PaymentControllerTest {
         paymentRequest.setExternalUserId("507f1f77bcf86cd799439011");
         paymentRequest.setAmount(500.00);
 
-        // Create sample payment response
-        paymentResponse = new CreatePaymentResponse();
-        paymentResponse.setPaymentId("pay_MnzJBBTmzqDjFG");
-        paymentResponse.setExternalUserId("507f1f77bcf86cd799439011");
-        paymentResponse.setAmount(500.00);
-        paymentResponse.setStatus("SUCCESS");
-        paymentResponse.setMessage("Payment processed successfully");
+        // Create sample payment response using builder
+        paymentResponse = PaymentInitResponse.builder()
+                .paymentId("pay_MnzJBBTmzqDjFG")
+                .status("SUCCESS")
+                .razorpayOrderId("order_MnzJBBTmzqDjFG")
+                .razorpayKey("rzp_test_key")
+                .amount(500.00)
+                .currency("INR")
+                .checkoutUrl("https://checkout.razorpay.com/v1/checkout.js")
+                .build();
     }
 
     @Test
@@ -54,17 +57,18 @@ class PaymentControllerTest {
                 .thenReturn(paymentResponse);
 
         // When
-        ResponseEntity<CreatePaymentResponse> result = paymentController.createPayment(paymentRequest);
+        ResponseEntity<PaymentInitResponse> result = paymentController.createPayment(paymentRequest);
 
         // Then
         assertNotNull(result);
-        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(200, result.getStatusCode().value());
         assertNotNull(result.getBody());
         assertEquals("pay_MnzJBBTmzqDjFG", result.getBody().getPaymentId());
-        assertEquals("507f1f77bcf86cd799439011", result.getBody().getExternalUserId());
-        assertEquals(500.00, result.getBody().getAmount());
         assertEquals("SUCCESS", result.getBody().getStatus());
-        assertEquals("Payment processed successfully", result.getBody().getMessage());
+        assertEquals(500.00, result.getBody().getAmount());
+        assertEquals("order_MnzJBBTmzqDjFG", result.getBody().getRazorpayOrderId());
+        assertEquals("rzp_test_key", result.getBody().getRazorpayKey());
+        assertEquals("INR", result.getBody().getCurrency());
 
         verify(paymentService).createPayment(any(CreatePaymentRequest.class));
     }

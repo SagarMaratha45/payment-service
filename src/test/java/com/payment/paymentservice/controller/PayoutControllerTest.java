@@ -60,7 +60,7 @@ class PayoutControllerTest {
 
         // Then
         assertNotNull(result);
-        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(200, result.getStatusCode().value());
         assertNotNull(result.getBody());
         assertEquals("pout_MnzJBBTmzqDjFG", result.getBody().getPayoutId());
         assertEquals("507f1f77bcf86cd799439011", result.getBody().getExternalUserId());
