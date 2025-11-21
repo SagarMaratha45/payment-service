@@ -1,9 +1,9 @@
 package com.payment.paymentservice.controller;
 
 import com.payment.paymentservice.dto.CreatePaymentRequest;
-import com.payment.paymentservice.dto.CreatePaymentResponse;
+import com.payment.paymentservice.dto.PaymentInitResponse;
+import com.payment.paymentservice.dto.RazorpaySuccessRequest;
 import com.payment.paymentservice.service.PaymentService;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +25,16 @@ public class PaymentController {
     }
 
     @PostMapping
-    public ResponseEntity<CreatePaymentResponse> createPayment(@Valid @RequestBody CreatePaymentRequest request) {
-        log.info("Received payment create request: userId={}, amount={}",
-                request.getExternalUserId(), request.getAmount());
-        CreatePaymentResponse response = paymentService.createPayment(request);
-        log.info("Payment response: id={}, status={}", response.getPaymentId(), response.getStatus());
-        return ResponseEntity.ok(response);
+    public ResponseEntity<PaymentInitResponse> createPayment(@RequestBody CreatePaymentRequest req) {
+        return ResponseEntity.ok(paymentService.createPayment(req));
+    }
+
+    // 2) Called from UI after Razorpay Checkout success
+    @PostMapping("/{paymentId}/success")
+    public ResponseEntity<PaymentInitResponse> handleSuccess(
+            @PathVariable String paymentId,
+            @RequestBody RazorpaySuccessRequest dto) {
+
+        return ResponseEntity.ok(paymentService.handleSuccess(paymentId, dto));
     }
 }
